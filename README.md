@@ -2,6 +2,12 @@
 
 Static prototype for the School of Jazz charity website.
 
+Published at:
+
+```text
+http://theschoolofjazz.com
+```
+
 ## Open Locally
 
 Run from this folder:
