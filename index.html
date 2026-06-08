@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The School of Jazz</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="The School of Jazz home">School of Jazz</a>
+      <nav aria-label="Primary navigation">
+        <a href="#mission">Mission</a>
+        <a href="#book">Book</a>
+        <a href="#portal">Student/Teacher</a>
+        <a href="#library">Library</a>
+      </nav>
+      <a class="buy-pill" href="#book">Buy the book</a>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <div class="hero-copy">
+          <p class="season">Summer 2026</p>
+          <h1 aria-label="The School of Jazz">The School<br>of Jazz</h1>
+          <div class="stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p class="manifesto"><b>Play</b> · <b>Listen</b> · <b>Learn</b></p>
+        </div>
+        <div class="logo-slot" role="img" aria-label="Reserved space for the School of Jazz logo">
+          <span>Logo PNG</span>
+        </div>
+        <div class="sun" aria-hidden="true"></div>
+      </section>
+
+      <section class="editorial two-col" id="mission">
+        <div>
+          <p class="section-number">01</p>
+          <h2>Music is not a competition. It's a conversation.</h2>
+        </div>
+        <div class="body-copy">
+          <p>The School of Jazz is a charity initiative teaching children to listen, feel time, find their own voice on an instrument, and play with one another.</p>
+          <p>We are not trying to raise virtuosos. We are trying to raise musicians: children who can take a risk, hear the band around them, carry on after a wrong note, and keep music in their lives for decades.</p>
+          <p>Our work begins with joy, but it does not stop there. Jazz asks children to notice one another: to make room, to answer, to lead for a moment and then hand the music back. A rehearsal becomes a small lesson in confidence, patience, memory, rhythm, and trust.</p>
+          <p>We teach through songs with deep roots, generous repetition, and daily contact with the instrument. Five honest minutes can matter. Ten can change the week. What matters most is the habit of returning: instrument out, ears open, record playing, one small thing better than yesterday.</p>
+          <blockquote class="mission-quote">
+            <p>The goal is a person still playing music at forty.</p>
+          </blockquote>
+        </div>
+      </section>
+
+      <section class="book-band" id="book">
+        <div class="book-copy">
+          <p class="section-number">02</p>
+          <h2>The Summer Book</h2>
+          <p>Part scrapbook, part practice companion, part love letter to five pieces of music. It gives students and parents the repertoire, listening notes, soloing ideas, glossary, and summer mission in one place.</p>
+          <a class="primary-link" href="mailto:hello@schoolofjazz.org?subject=Buy%20The%20School%20of%20Jazz%20Summer%20Book">Buy the book</a>
+        </div>
+        <div class="book-side">
+          <figure class="cover-card book-cover">
+            <img src="assets/summer-book-cover.png" alt="The School of Jazz Summer Book cover">
+            <figcaption>Getz / Gilberto — the record we study</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="portal" id="portal">
+        <div class="portal-head">
+          <div>
+            <p class="section-number">03</p>
+            <h2>Practice Portal</h2>
+          </div>
+          <div class="role-switch" aria-label="Choose portal view">
+            <button class="active" data-role="student" type="button">Student</button>
+            <button data-role="teacher" type="button">Teacher</button>
+          </div>
+        </div>
+
+        <div class="login-row" aria-label="Demo login">
+          <label>
+            Student
+            <select id="studentSelect">
+              <option value="Rumi">Rumi · double bass</option>
+              <option value="Roxy">Roxy · melodica</option>
+              <option value="Leo">Leo · saxophone</option>
+              <option value="Ariel">Ariel · trumpet</option>
+              <option value="Rafe">Rafe · piano</option>
+            </select>
+          </label>
+          <label>
+            Teacher view
+            <select id="teacherSelect">
+              <option>Roland</option>
+              <option>Tahmima</option>
+              <option>Joe</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="portal-grid student-view">
+          <section class="panel streak-panel">
+            <p class="eyebrow">Daily streak</p>
+            <div class="streak-number"><span id="streakCount">0</span><small>days</small></div>
+            <p id="streakMessage">Show up today. Ten honest minutes counts.</p>
+            <div class="week-strip" id="weekStrip" aria-label="This week's practice"></div>
+          </section>
+
+          <section class="panel log-panel">
+            <p class="eyebrow">Log practice</p>
+            <form id="practiceForm">
+              <label>Today I practised
+                <select id="songInput">
+                  <option>The Girl from Ipanema</option>
+                  <option>All Blues</option>
+                  <option>Canteloupe Island</option>
+                  <option>Watermelon Man</option>
+                  <option>Sunny Side of the Street</option>
+                </select>
+              </label>
+              <label>Minutes
+                <input id="minutesInput" type="number" min="1" max="180" value="10">
+              </label>
+              <label>What sounded better today?
+                <textarea id="noteInput" rows="3">My time felt steadier with the recording.</textarea>
+              </label>
+              <button class="primary-button" type="submit">Add practice</button>
+            </form>
+          </section>
+
+          <section class="panel full">
+            <p class="eyebrow">My recent practice</p>
+            <div class="log-list" id="studentLogs"></div>
+          </section>
+        </div>
+
+        <div class="portal-grid teacher-view hidden">
+          <section class="panel roster-panel">
+            <p class="eyebrow">Band overview</p>
+            <div id="roster"></div>
+          </section>
+          <section class="panel full">
+            <p class="eyebrow">Student practice logs</p>
+            <div class="log-list" id="teacherLogs"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="library" id="library">
+        <div>
+          <p class="section-number">04</p>
+          <h2>Inspiration Library</h2>
+          <p>Names, performances, and visual references for the artists and worlds that shape the repertoire.</p>
+        </div>
+        <div class="library-grid" id="libraryGrid"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>The School of Jazz</p>
+      <p>Play · Listen · Learn</p>
+    </footer>
+
+    <script src="app.js?v=clean-repertoire"></script>
+  </body>
+</html>
