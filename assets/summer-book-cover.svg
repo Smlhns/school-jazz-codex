@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 802 1134" role="img" aria-labelledby="title desc">
+  <title id="title">The School of Jazz Summer Book cover</title>
+  <desc id="desc">A clean recreation of the Summer Book cover with cream paper, orange masthead, yellow sun, and Getz/Gilberto record artwork.</desc>
+  <rect width="802" height="1134" fill="#fff3df"/>
+  <rect width="802" height="101" fill="#ef8345"/>
+  <text x="70" y="67" fill="#fff" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" letter-spacing="6">SCHOOL OF JAZZ</text>
+  <text x="640" y="67" fill="#fff" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">SUMMER 2026</text>
+  <circle cx="687" cy="277" r="114" fill="#f6d552"/>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#11100b">
+    <text x="70" y="284" font-size="71" font-weight="700">The School</text>
+    <text x="70" y="357" font-size="71" font-weight="700">of Jazz</text>
+    <text x="70" y="407" font-size="41" font-style="italic" fill="#ef8345">Summer Book</text>
+  </g>
+  <rect x="70" y="415" width="146" height="11" rx="5.5" fill="#ef8345"/>
+  <rect x="210" y="415" width="116" height="11" rx="5.5" fill="#8da56a"/>
+  <rect x="318" y="415" width="116" height="11" rx="5.5" fill="#08708a"/>
+  <text x="70" y="453" fill="#8d7258" font-family="Inter, Arial, sans-serif" font-size="20">A family band  ·  a summer of music</text>
+  <g transform="translate(451 699)">
+    <rect x="5" y="5" width="284" height="284" rx="6" fill="#d7c7a6"/>
+    <rect width="284" height="284" rx="6" fill="#11100b"/>
+    <text x="91" y="67" fill="#f6d552" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">GETZ / GILBERTO</text>
+    <text x="92" y="87" fill="#ef8345" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="800">STAN GETZ · JOAO GILBERTO</text>
+    <text x="92" y="101" fill="#f6d552" font-family="Inter, Arial, sans-serif" font-size="9">featuring Antonio Carlos Jobim</text>
+    <rect x="86" y="124" width="150" height="150" fill="#ef8345"/>
+    <path d="M109 150l48-16 48 18-10 44-47 24-43-25z" fill="#e68a45"/>
+    <path d="M128 162l34-10 16 28-24 25-33-10z" fill="#f6d552"/>
+    <path d="M190 150l31 15-17 35-28-14z" fill="#15130f"/>
+    <path d="M104 211l26 14-10 29-31-9z" fill="#15130f"/>
+    <path d="M206 218l28 12-11 28-28-13z" fill="#f6d552"/>
+    <circle cx="46" cy="230" r="13" fill="none" stroke="#8d8d8d" stroke-width="2"/>
+    <path d="M39 226h14l-7 10z" fill="#8d8d8d"/>
+  </g>
+  <circle cx="78" cy="1006" r="7" fill="#08708a"/>
+  <text x="93" y="1011" fill="#ef8345" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="900" letter-spacing="4">PLAY · LISTEN · LEARN</text>
+  <text x="70" y="1041" fill="#8d7258" font-family="Inter, Arial, sans-serif" font-size="16">Rumi · Roxy · Leo · Ariel · Rafe — and the grown-ups</text>
+</svg>
