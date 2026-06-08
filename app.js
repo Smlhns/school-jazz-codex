@@ -6,6 +6,17 @@ const students = {
   Rafe: { instrument: "piano", color: "#11100b" }
 };
 
+const portalAccounts = {
+  "rumi@theschoolofjazz.com": { role: "student", student: "Rumi" },
+  "roxy@theschoolofjazz.com": { role: "student", student: "Roxy" },
+  "leo@theschoolofjazz.com": { role: "student", student: "Leo" },
+  "ariel@theschoolofjazz.com": { role: "student", student: "Ariel" },
+  "rafe@theschoolofjazz.com": { role: "student", student: "Rafe" },
+  "admin@theschoolofjazz.com": { role: "teacher" }
+};
+
+const portalPassword = "SchoolOfJazz2026";
+
 const seedLogs = [
   { student: "Rumi", date: daysAgo(0), song: "The Girl from Ipanema", minutes: 14, note: "Bass line stayed steady with the record." },
   { student: "Rumi", date: daysAgo(1), song: "All Blues", minutes: 10, note: "Found the root notes without stopping." },
@@ -18,28 +29,34 @@ const seedLogs = [
 
 const library = [
   {
-    title: "Stan Getz",
+    title: "The Girl from Ipanema",
     type: "Performance",
-    copy: "Hear the saxophone sing with a voice-like tone and relaxed time.",
-    url: "https://www.youtube.com/results?search_query=Stan+Getz+The+Girl+from+Ipanema+live"
+    copy: "Listen for the relaxed bossa nova pulse, the gentle melody, and the way the band keeps the time floating.",
+    url: "https://www.youtube.com/results?search_query=Getz+Gilberto+The+Girl+from+Ipanema"
   },
   {
-    title: "Joao Gilberto",
+    title: "All Blues",
     type: "Listening",
-    copy: "Bossa nova guitar as a heartbeat: quiet, precise, and full of air.",
-    url: "https://www.youtube.com/results?search_query=Joao+Gilberto+bossa+nova+live"
+    copy: "Hear the slow six feel, the spacious melody, and the way Miles Davis lets every phrase breathe.",
+    url: "https://www.youtube.com/results?search_query=Miles+Davis+All+Blues"
   },
   {
-    title: "Astrud Gilberto",
-    type: "Voice",
-    copy: "A lesson in melody, understatement, and singing a phrase like a sentence.",
-    url: "https://www.youtube.com/results?search_query=Astrud+Gilberto+Girl+from+Ipanema"
+    title: "Canteloupe Island",
+    type: "Groove",
+    copy: "Follow the repeating piano riff, the earthy swing, and the strong shape of Herbie Hancock's melody.",
+    url: "https://www.youtube.com/results?search_query=Herbie+Hancock+Canteloupe+Island"
   },
   {
-    title: "Antonio Carlos Jobim",
-    type: "Composer",
-    copy: "The harmony and colour behind the songs: elegant, generous, unforgettable.",
-    url: "https://www.youtube.com/results?search_query=Antonio+Carlos+Jobim+performance"
+    title: "Watermelon Man",
+    type: "Rhythm",
+    copy: "Listen for the bluesy hook, the dance feel, and the way the rhythm section makes the tune bounce.",
+    url: "https://www.youtube.com/results?search_query=Herbie+Hancock+Watermelon+Man"
+  },
+  {
+    title: "Sunny Side of the Street",
+    type: "Song",
+    copy: "Hear Louis Armstrong's warmth, swing, and storytelling: every line feels like speech turned into music.",
+    url: "https://www.youtube.com/results?search_query=Louis+Armstrong+Sunny+Side+of+the+Street"
   }
 ];
 
@@ -48,6 +65,10 @@ saveLogs();
 const roleButtons = document.querySelectorAll("[data-role]");
 const studentSelect = document.querySelector("#studentSelect");
 const practiceForm = document.querySelector("#practiceForm");
+const signinForm = document.querySelector("#signinForm");
+const signinEmail = document.querySelector("#signinEmail");
+const signinPassword = document.querySelector("#signinPassword");
+const signinError = document.querySelector("#signinError");
 
 function daysAgo(amount) {
   const date = new Date();
@@ -99,6 +120,7 @@ function calculateStreak(student) {
 function renderWeek(student) {
   const practisedDays = new Set(logs.filter(log => log.student === student).map(log => log.date));
   const weekStrip = document.querySelector("#weekStrip");
+  if (!weekStrip) return;
   weekStrip.innerHTML = "";
   for (let i = 6; i >= 0; i -= 1) {
     const date = daysAgo(i);
@@ -112,6 +134,7 @@ function renderWeek(student) {
 }
 
 function renderStudent() {
+  if (!studentSelect) return;
   const student = studentSelect.value;
   const streak = calculateStreak(student);
   document.querySelector("#streakCount").textContent = streak;
@@ -127,6 +150,9 @@ function renderStudent() {
 }
 
 function renderTeacher() {
+  const rosterNode = document.querySelector("#roster");
+  const teacherLogsNode = document.querySelector("#teacherLogs");
+  if (!rosterNode || !teacherLogsNode) return;
   const roster = Object.entries(students).map(([name, meta]) => {
     const studentLogs = logs.filter(log => log.student === name);
     const total = studentLogs.reduce((sum, log) => sum + Number(log.minutes), 0);
@@ -142,8 +168,8 @@ function renderTeacher() {
     `;
   }).join("");
 
-  document.querySelector("#roster").innerHTML = roster;
-  document.querySelector("#teacherLogs").innerHTML = logs
+  rosterNode.innerHTML = roster;
+  teacherLogsNode.innerHTML = logs
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
     .map(log => logTemplate(log, true))
@@ -164,7 +190,9 @@ function logTemplate(log, showStudent = false) {
 }
 
 function renderLibrary() {
-  document.querySelector("#libraryGrid").innerHTML = library.map(item => `
+  const libraryGrid = document.querySelector("#libraryGrid");
+  if (!libraryGrid) return;
+  libraryGrid.innerHTML = library.map(item => `
     <article class="library-card">
       <h3>${item.title}</h3>
       <p><b>${item.type}</b></p>
@@ -174,34 +202,73 @@ function renderLibrary() {
   `).join("");
 }
 
-roleButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    roleButtons.forEach(item => item.classList.remove("active"));
-    button.classList.add("active");
-    const role = button.dataset.role;
-    document.querySelector(".student-view").classList.toggle("hidden", role !== "student");
-    document.querySelector(".teacher-view").classList.toggle("hidden", role !== "teacher");
-  });
-});
+function setPortalRole(role) {
+  const portalShell = document.querySelector("#portalShell");
+  const studentView = document.querySelector(".student-view");
+  const teacherView = document.querySelector(".teacher-view");
+  if (portalShell) {
+    portalShell.classList.toggle("portal-mode-student", role === "student");
+    portalShell.classList.toggle("portal-mode-teacher", role === "teacher");
+  }
+  roleButtons.forEach(item => item.classList.toggle("active", item.dataset.role === role));
+  if (studentView) studentView.classList.toggle("hidden", role !== "student");
+  if (teacherView) teacherView.classList.toggle("hidden", role !== "teacher");
+}
 
-studentSelect.addEventListener("change", renderStudent);
-
-practiceForm.addEventListener("submit", event => {
-  event.preventDefault();
-  const noteInput = document.querySelector("#noteInput");
-  logs.unshift({
-    student: studentSelect.value,
-    date: daysAgo(0),
-    song: document.querySelector("#songInput").value,
-    minutes: Number(document.querySelector("#minutesInput").value),
-    note: noteInput.value.trim() || "Showed up and played."
-  });
-  saveLogs();
-  noteInput.value = "";
+function enterPortal(account) {
+  const signinPanel = document.querySelector("#signinPanel");
+  const portalShell = document.querySelector("#portalShell");
+  if (signinPanel) signinPanel.classList.add("hidden");
+  if (portalShell) portalShell.classList.remove("hidden");
+  if (studentSelect && account.student) studentSelect.value = account.student;
+  setPortalRole(account.role);
   renderStudent();
   renderTeacher();
+}
+
+if (signinForm) {
+  signinForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const email = signinEmail.value.trim().toLowerCase();
+    const account = portalAccounts[email];
+    const passwordMatches = signinPassword.value === portalPassword;
+    if (!account || !passwordMatches) {
+      signinError.classList.remove("hidden");
+      signinPassword.value = "";
+      signinPassword.focus();
+      return;
+    }
+    signinError.classList.add("hidden");
+    enterPortal(account);
+  });
+}
+
+roleButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    setPortalRole(button.dataset.role);
+  });
 });
 
-renderStudent();
-renderTeacher();
+if (studentSelect) {
+  studentSelect.addEventListener("change", renderStudent);
+}
+
+if (practiceForm) {
+  practiceForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const noteInput = document.querySelector("#noteInput");
+    logs.unshift({
+      student: studentSelect.value,
+      date: daysAgo(0),
+      song: document.querySelector("#songInput").value,
+      minutes: Number(document.querySelector("#minutesInput").value),
+      note: noteInput.value.trim() || "Showed up and played."
+    });
+    saveLogs();
+    noteInput.value = "";
+    renderStudent();
+    renderTeacher();
+  });
+}
+
 renderLibrary();

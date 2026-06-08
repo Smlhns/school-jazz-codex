@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Practice Portal | The School of Jazz</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html#home" aria-label="The School of Jazz home">School of Jazz</a>
+      <nav aria-label="Primary navigation">
+        <a href="index.html#mission">Mission</a>
+        <a href="index.html#book">Book</a>
+        <a href="index.html#library">Library</a>
+      </nav>
+      <div class="topbar-actions">
+        <a class="buy-pill" href="index.html#book">Buy the book</a>
+        <a class="buy-pill" href="#portal">Sign in</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="portal portal-page" id="portal">
+        <div class="signin-panel panel" id="signinPanel">
+          <p class="section-number">03</p>
+          <h1>Practice Portal</h1>
+          <p class="signin-copy">Students and teachers sign in here to log practice, check daily streaks, and review the band’s listening work.</p>
+          <form id="signinForm" class="signin-form">
+            <label>
+              Email
+              <input id="signinEmail" type="email" autocomplete="email" placeholder="rumi@theschoolofjazz.com" required>
+            </label>
+            <label>
+              Password
+              <input id="signinPassword" type="password" autocomplete="current-password" required>
+            </label>
+            <p class="signin-error hidden" id="signinError">Please check the email address and password.</p>
+            <button class="primary-button signin-submit" id="enterPortalButton" type="submit">Enter portal</button>
+          </form>
+        </div>
+
+        <div class="portal-shell hidden" id="portalShell">
+          <div class="portal-head">
+            <div>
+              <p class="section-number">03</p>
+              <h2>Practice Portal</h2>
+            </div>
+            <div class="role-switch" aria-label="Choose portal view">
+              <button class="active" data-role="student" type="button">Student</button>
+              <button data-role="teacher" type="button">Teacher</button>
+            </div>
+          </div>
+
+          <div class="login-row" aria-label="Demo login">
+            <label class="student-account-control">
+              Student
+              <select id="studentSelect">
+                <option value="Rumi">Rumi · double bass</option>
+                <option value="Roxy">Roxy · melodica</option>
+                <option value="Leo">Leo · saxophone</option>
+                <option value="Ariel">Ariel · trumpet</option>
+                <option value="Rafe">Rafe · piano</option>
+              </select>
+            </label>
+            <label class="teacher-account-control">
+              Teacher view
+              <select id="teacherSelect">
+                <option>Roland</option>
+                <option>Tahmima</option>
+                <option>Joe</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="portal-grid student-view">
+            <section class="panel streak-panel">
+              <p class="eyebrow">Daily streak</p>
+              <div class="streak-number"><span id="streakCount">0</span><small>days</small></div>
+              <p id="streakMessage">Show up today. Ten honest minutes counts.</p>
+              <div class="week-strip" id="weekStrip" aria-label="This week's practice"></div>
+            </section>
+
+            <section class="panel log-panel">
+              <p class="eyebrow">Log practice</p>
+              <form id="practiceForm">
+                <label>Today I practised
+                  <select id="songInput">
+                    <option>The Girl from Ipanema</option>
+                    <option>All Blues</option>
+                    <option>Canteloupe Island</option>
+                    <option>Watermelon Man</option>
+                    <option>Sunny Side of the Street</option>
+                  </select>
+                </label>
+                <label>Minutes
+                  <input id="minutesInput" type="number" min="1" max="180" value="10">
+                </label>
+                <label>What sounded better today?
+                  <textarea id="noteInput" rows="3">My time felt steadier with the recording.</textarea>
+                </label>
+                <button class="primary-button" type="submit">Add practice</button>
+              </form>
+            </section>
+
+            <section class="panel full">
+              <p class="eyebrow">My recent practice</p>
+              <div class="log-list" id="studentLogs"></div>
+            </section>
+          </div>
+
+          <div class="portal-grid teacher-view hidden">
+            <section class="panel roster-panel">
+              <p class="eyebrow">Band overview</p>
+              <div id="roster"></div>
+            </section>
+            <section class="panel full">
+              <p class="eyebrow">Student practice logs</p>
+              <div class="log-list" id="teacherLogs"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>The School of Jazz</p>
+      <p>Play · Listen · Learn</p>
+    </footer>
+
+    <script src="app.js?v=email-auth-1"></script>
+  </body>
+</html>

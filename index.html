@@ -12,10 +12,12 @@
       <nav aria-label="Primary navigation">
         <a href="#mission">Mission</a>
         <a href="#book">Book</a>
-        <a href="#portal">Student/Teacher</a>
         <a href="#library">Library</a>
       </nav>
-      <a class="buy-pill" href="#book">Buy the book</a>
+      <div class="topbar-actions">
+        <a class="buy-pill" href="#book">Buy the book</a>
+        <a class="buy-pill" href="portal.html">Sign in</a>
+      </div>
     </header>
 
     <main>
@@ -58,95 +60,13 @@
         <div class="book-side">
           <figure class="cover-card book-cover">
             <img src="assets/summer-book-cover.jpg" alt="The School of Jazz Summer Book cover">
-            <figcaption>Getz / Gilberto — the record we study</figcaption>
           </figure>
-        </div>
-      </section>
-
-      <section class="portal" id="portal">
-        <div class="portal-head">
-          <div>
-            <p class="section-number">03</p>
-            <h2>Practice Portal</h2>
-          </div>
-          <div class="role-switch" aria-label="Choose portal view">
-            <button class="active" data-role="student" type="button">Student</button>
-            <button data-role="teacher" type="button">Teacher</button>
-          </div>
-        </div>
-
-        <div class="login-row" aria-label="Demo login">
-          <label>
-            Student
-            <select id="studentSelect">
-              <option value="Rumi">Rumi · double bass</option>
-              <option value="Roxy">Roxy · melodica</option>
-              <option value="Leo">Leo · saxophone</option>
-              <option value="Ariel">Ariel · trumpet</option>
-              <option value="Rafe">Rafe · piano</option>
-            </select>
-          </label>
-          <label>
-            Teacher view
-            <select id="teacherSelect">
-              <option>Roland</option>
-              <option>Tahmima</option>
-              <option>Joe</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="portal-grid student-view">
-          <section class="panel streak-panel">
-            <p class="eyebrow">Daily streak</p>
-            <div class="streak-number"><span id="streakCount">0</span><small>days</small></div>
-            <p id="streakMessage">Show up today. Ten honest minutes counts.</p>
-            <div class="week-strip" id="weekStrip" aria-label="This week's practice"></div>
-          </section>
-
-          <section class="panel log-panel">
-            <p class="eyebrow">Log practice</p>
-            <form id="practiceForm">
-              <label>Today I practised
-                <select id="songInput">
-                  <option>The Girl from Ipanema</option>
-                  <option>All Blues</option>
-                  <option>Canteloupe Island</option>
-                  <option>Watermelon Man</option>
-                  <option>Sunny Side of the Street</option>
-                </select>
-              </label>
-              <label>Minutes
-                <input id="minutesInput" type="number" min="1" max="180" value="10">
-              </label>
-              <label>What sounded better today?
-                <textarea id="noteInput" rows="3">My time felt steadier with the recording.</textarea>
-              </label>
-              <button class="primary-button" type="submit">Add practice</button>
-            </form>
-          </section>
-
-          <section class="panel full">
-            <p class="eyebrow">My recent practice</p>
-            <div class="log-list" id="studentLogs"></div>
-          </section>
-        </div>
-
-        <div class="portal-grid teacher-view hidden">
-          <section class="panel roster-panel">
-            <p class="eyebrow">Band overview</p>
-            <div id="roster"></div>
-          </section>
-          <section class="panel full">
-            <p class="eyebrow">Student practice logs</p>
-            <div class="log-list" id="teacherLogs"></div>
-          </section>
         </div>
       </section>
 
       <section class="library" id="library">
         <div>
-          <p class="section-number">04</p>
+          <p class="section-number">03</p>
           <h2>Inspiration Library</h2>
           <p>Names, performances, and visual references for the artists and worlds that shape the repertoire.</p>
         </div>
