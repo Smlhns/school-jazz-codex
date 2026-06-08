@@ -139,7 +139,7 @@ h2 {
   z-index: 2;
   justify-self: end;
   align-self: center;
-  width: min(100%, 180px);
+  width: min(100%, 320px);
   margin: 0;
 }
 
@@ -148,6 +148,7 @@ h2 {
   width: 100%;
   height: auto;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .cover-card {
@@ -618,7 +619,7 @@ footer {
 
   .hero-logo {
     justify-self: start;
-    width: min(62vw, 165px);
+    width: min(82vw, 320px);
   }
 
   .book-side, .book-notes, .library-grid {
