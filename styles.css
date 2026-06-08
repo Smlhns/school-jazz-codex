@@ -282,7 +282,8 @@ textarea {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 22px;
   line-height: 1.15;
-}\n
+}
+
 .portal-head {
   display: flex;
   align-items: end;
