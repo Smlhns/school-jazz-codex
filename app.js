@@ -171,14 +171,12 @@ function mapPracticeLog(row, fallbackStudent) {
 
 async function loadSupabaseLogs(account) {
   if (!supabaseClient || !account?.supabase) return;
-  let query = supabaseClient
+  const { data, error } = await supabaseClient
     .from("practice_logs")
     .select("id, student_id, practiced_on, song, minutes, note, profiles(full_name)")
     .order("practiced_on", { ascending: false })
     .order("created_at", { ascending: false });
 
-  if (account.role === "student") query = query.eq("student_id", account.profileId);
-  const { data, error } = await query;
   if (error) throw error;
   logs = (data || []).map(row => mapPracticeLog(row, account.student));
   saveLogs();
@@ -260,10 +258,10 @@ function renderStudent() {
     : "Show up today. Ten honest minutes counts.";
   renderWeek(student);
 
-  const studentLogs = logs
-    .filter(log => log.student === student)
+  const bandLogs = logs
+    .slice()
     .sort((a, b) => b.date.localeCompare(a.date));
-  document.querySelector("#studentLogs").innerHTML = studentLogs.map(logTemplate).join("");
+  document.querySelector("#studentLogs").innerHTML = bandLogs.map(log => logTemplate(log, true)).join("");
 }
 
 function renderTeacher() {
