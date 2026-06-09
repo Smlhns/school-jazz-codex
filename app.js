@@ -16,16 +16,8 @@ const portalAccounts = {
 };
 
 const portalPassword = "SchoolOfJazz2026";
-
-const seedLogs = [
-  { student: "Rumi", date: daysAgo(0), song: "The Girl from Ipanema", minutes: 14, note: "Bass line stayed steady with the record." },
-  { student: "Rumi", date: daysAgo(1), song: "All Blues", minutes: 10, note: "Found the root notes without stopping." },
-  { student: "Rumi", date: daysAgo(2), song: "Sunny Side of the Street", minutes: 12, note: "Counted four bars before coming in." },
-  { student: "Roxy", date: daysAgo(0), song: "Canteloupe Island", minutes: 16, note: "Sang the melody before playing it." },
-  { student: "Leo", date: daysAgo(1), song: "Watermelon Man", minutes: 11, note: "Long tones sounded warmer." },
-  { student: "Ariel", date: daysAgo(0), song: "The Girl from Ipanema", minutes: 9, note: "Clean attacks on the first phrase." },
-  { student: "Rafe", date: daysAgo(3), song: "All Blues", minutes: 20, note: "Comped quietly and left more space." }
-];
+const practiceStorageKey = "school-of-jazz-practice-live";
+localStorage.removeItem("school-of-jazz-practice");
 
 const library = [
   {
@@ -72,6 +64,8 @@ const library = [
 
 let logs = loadLogs();
 saveLogs();
+let activeAccount = null;
+const supabaseClient = window.schoolJazzSupabase || null;
 const roleButtons = document.querySelectorAll("[data-role]");
 const studentSelect = document.querySelector("#studentSelect");
 const practiceForm = document.querySelector("#practiceForm");
@@ -93,12 +87,12 @@ function daysAgo(amount) {
 }
 
 function loadLogs() {
-  const saved = localStorage.getItem("school-of-jazz-practice");
-  return migrateLogs(saved ? JSON.parse(saved) : seedLogs);
+  const saved = localStorage.getItem(practiceStorageKey);
+  return migrateLogs(saved ? JSON.parse(saved) : []);
 }
 
 function saveLogs() {
-  localStorage.setItem("school-of-jazz-practice", JSON.stringify(logs));
+  localStorage.setItem(practiceStorageKey, JSON.stringify(logs));
 }
 
 function saveSignupInterest(name, email) {
@@ -110,6 +104,102 @@ function saveSignupInterest(name, email) {
     date: new Date().toISOString()
   });
   localStorage.setItem("school-of-jazz-signups", JSON.stringify(signups));
+}
+
+function getStudentNameFromEmail(email) {
+  const prefix = email.split("@")[0];
+  return Object.keys(students).find(name => name.toLowerCase() === prefix) || prefix;
+}
+
+function getStudentNameFromProfile(profile, email) {
+  const candidate = profile?.full_name || getStudentNameFromEmail(email);
+  return Object.keys(students).find(name => name.toLowerCase() === String(candidate).toLowerCase()) || candidate;
+}
+
+function profileToAccount(profile, user) {
+  const email = user.email.toLowerCase();
+  const role = profile?.role === "teacher" || profile?.role === "admin" ? "teacher" : "student";
+  const student = role === "student" ? getStudentNameFromProfile(profile, email) : null;
+  return {
+    role,
+    student,
+    profileId: user.id,
+    supabase: true
+  };
+}
+
+async function getOrCreateProfile(user) {
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("id, email, full_name, role, instrument")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (data) return data;
+  const email = user.email.toLowerCase();
+  const allowedAccount = portalAccounts[email];
+  if (!allowedAccount || allowedAccount.role !== "student") throw error || new Error("No portal profile found.");
+
+  const student = allowedAccount.student;
+  const fallbackProfile = {
+    id: user.id,
+    email,
+    full_name: student,
+    role: "student",
+    instrument: students[student]?.instrument || null
+  };
+  const { data: created, error: createError } = await supabaseClient
+    .from("profiles")
+    .insert(fallbackProfile)
+    .select("id, email, full_name, role, instrument")
+    .single();
+  if (createError) throw createError;
+  return created;
+}
+
+function mapPracticeLog(row, fallbackStudent) {
+  return {
+    supabaseId: row.id,
+    studentId: row.student_id,
+    student: row.profiles?.full_name || fallbackStudent || "Student",
+    date: row.practiced_on,
+    song: row.song,
+    minutes: row.minutes,
+    note: row.note || "Showed up and played."
+  };
+}
+
+async function loadSupabaseLogs(account) {
+  if (!supabaseClient || !account?.supabase) return;
+  let query = supabaseClient
+    .from("practice_logs")
+    .select("id, student_id, practiced_on, song, minutes, note, profiles(full_name)")
+    .order("practiced_on", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (account.role === "student") query = query.eq("student_id", account.profileId);
+  const { data, error } = await query;
+  if (error) throw error;
+  logs = (data || []).map(row => mapPracticeLog(row, account.student));
+  saveLogs();
+}
+
+async function signInWithSupabase(email, password) {
+  if (!supabaseClient) throw new Error("Supabase is not loaded.");
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  const profile = await getOrCreateProfile(data.user);
+  const account = profileToAccount(profile, data.user);
+  await loadSupabaseLogs(account);
+  return account;
+}
+
+async function registerSignupInterest(name, email) {
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient
+    .from("signup_interests")
+    .insert({ name, email });
+  if (error) throw error;
 }
 
 function migrateLogs(items) {
@@ -267,19 +357,40 @@ function enterPortal(account) {
 }
 
 if (signinForm) {
-  signinForm.addEventListener("submit", event => {
+  signinForm.addEventListener("submit", async event => {
     event.preventDefault();
     const email = signinEmail.value.trim().toLowerCase();
-    const account = portalAccounts[email];
-    const passwordMatches = signinPassword.value === portalPassword;
-    if (!account || !passwordMatches) {
-      signinError.classList.remove("hidden");
-      signinPassword.value = "";
-      signinPassword.focus();
-      return;
+    const password = signinPassword.value;
+    const submitButton = signinForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
+    try {
+      const account = await signInWithSupabase(email, password);
+      activeAccount = account;
+      signinError.classList.add("hidden");
+      enterPortal(account);
+    } catch (error) {
+      if (supabaseClient) {
+        signinError.textContent = "Please check the email address and password.";
+        signinError.classList.remove("hidden");
+        signinPassword.value = "";
+        signinPassword.focus();
+        return;
+      }
+      const account = portalAccounts[email];
+      const passwordMatches = password === portalPassword;
+      if (!account || !passwordMatches) {
+        signinError.textContent = "Please check the email address and password.";
+        signinError.classList.remove("hidden");
+        signinPassword.value = "";
+        signinPassword.focus();
+        return;
+      }
+      activeAccount = account;
+      signinError.classList.add("hidden");
+      enterPortal(account);
+    } finally {
+      if (submitButton) submitButton.disabled = false;
     }
-    signinError.classList.add("hidden");
-    enterPortal(account);
   });
 }
 
@@ -297,6 +408,7 @@ if (signupForm) {
     const submitButton = signupForm.querySelector("button[type='submit']");
     if (submitButton) submitButton.disabled = true;
     try {
+      await registerSignupInterest(name, email);
       const response = await fetch(signupForm.action, {
         method: "POST",
         body: new FormData(signupForm),
@@ -327,17 +439,35 @@ if (studentSelect) {
 }
 
 if (practiceForm) {
-  practiceForm.addEventListener("submit", event => {
+  practiceForm.addEventListener("submit", async event => {
     event.preventDefault();
     const noteInput = document.querySelector("#noteInput");
-    logs.unshift({
+    const entry = {
       student: studentSelect.value,
       date: daysAgo(0),
       song: document.querySelector("#songInput").value,
       minutes: Number(document.querySelector("#minutesInput").value),
       note: noteInput.value.trim() || "Showed up and played."
-    });
-    saveLogs();
+    };
+    if (activeAccount?.supabase && supabaseClient) {
+      const { error } = await supabaseClient
+        .from("practice_logs")
+        .insert({
+          student_id: activeAccount.profileId,
+          practiced_on: entry.date,
+          song: entry.song,
+          minutes: entry.minutes,
+          note: entry.note
+        });
+      if (error) {
+        alert("Practice could not be saved. Please try again.");
+        return;
+      }
+      await loadSupabaseLogs(activeAccount);
+    } else {
+      logs.unshift(entry);
+      saveLogs();
+    }
     noteInput.value = "";
     renderStudent();
     renderTeacher();
