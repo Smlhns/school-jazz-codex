@@ -299,6 +299,15 @@ textarea {
   margin-bottom: 28px;
 }
 
+.portal-subtitle {
+  max-width: 620px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.35;
+}
+
 .role-switch {
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
@@ -344,6 +353,14 @@ textarea {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 20px;
   line-height: 1.5;
+}
+
+.signup-success {
+  text-align: left;
+}
+
+.signup-success .primary-link {
+  display: inline-flex;
 }
 
 .signin-form {
@@ -525,27 +542,28 @@ form {
 }
 
 .library-card {
-  min-height: 210px;
+  min-height: 230px;
   padding: 18px;
   position: relative;
   overflow: hidden;
 }
 
-.library-card::after {
-  content: "";
+.library-artist {
   position: absolute;
   right: 18px;
   top: 18px;
-  width: 66px;
+  width: 82px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--sun);
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, .68);
+  box-shadow: 0 8px 22px rgba(17, 16, 11, .14);
 }
 
 .library-card h3 {
   position: relative;
   z-index: 1;
-  max-width: calc(100% - 84px);
+  max-width: calc(100% - 104px);
   margin: 0 0 8px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 28px;
@@ -555,6 +573,7 @@ form {
 .library-card p {
   position: relative;
   z-index: 1;
+  max-width: calc(100% - 104px);
   margin: 0 0 16px;
   color: var(--muted);
   font-size: 15px;
