@@ -284,18 +284,35 @@ if (signinForm) {
 }
 
 if (signupForm) {
-  signupForm.addEventListener("submit", event => {
+  signupForm.addEventListener("submit", async event => {
     event.preventDefault();
     const name = signupName.value.trim();
     const email = signupEmail.value.trim();
     if (!name || !email) {
+      signupError.textContent = "Please enter a name and email address.";
       signupError.classList.remove("hidden");
       return;
     }
     signupError.classList.add("hidden");
-    saveSignupInterest(name, email);
-    if (signupPanel) signupPanel.classList.add("hidden");
-    if (signupSuccess) signupSuccess.classList.remove("hidden");
+    const submitButton = signupForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
+    try {
+      const response = await fetch(signupForm.action, {
+        method: "POST",
+        body: new FormData(signupForm),
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) throw new Error("Form submission failed");
+      saveSignupInterest(name, email);
+      signupForm.reset();
+      if (signupPanel) signupPanel.classList.add("hidden");
+      if (signupSuccess) signupSuccess.classList.remove("hidden");
+    } catch (error) {
+      signupError.textContent = "Something went wrong. Please try again in a moment.";
+      signupError.classList.remove("hidden");
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 }
 
