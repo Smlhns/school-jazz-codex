@@ -15,7 +15,7 @@
         <a href="index.html#library">Library</a>
       </nav>
       <div class="topbar-actions">
-        <a class="buy-pill" href="index.html#book">Buy the book</a>
+        <a class="buy-pill" href="signup.html">Sign up</a>
         <a class="buy-pill" href="#portal">Sign in</a>
       </div>
     </header>
@@ -23,13 +23,13 @@
     <main>
       <section class="portal portal-page" id="portal">
         <div class="signin-panel panel" id="signinPanel">
-          <p class="section-number">03</p>
+          <p class="section-number">05</p>
           <h1>Practice Portal</h1>
           <p class="signin-copy">Students and teachers sign in here to log practice, check daily streaks, and review the band’s listening work.</p>
           <form id="signinForm" class="signin-form">
             <label>
               Email
-              <input id="signinEmail" type="email" autocomplete="email" placeholder="rumi@theschoolofjazz.com" required>
+              <input id="signinEmail" type="email" autocomplete="email" required>
             </label>
             <label>
               Password
@@ -43,8 +43,9 @@
         <div class="portal-shell hidden" id="portalShell">
           <div class="portal-head">
             <div>
-              <p class="section-number">03</p>
-              <h2>Practice Portal</h2>
+              <p class="section-number">05</p>
+              <h2 id="portalTitle">Practice Portal</h2>
+              <p class="portal-subtitle" id="portalSubtitle">A little every day. Keep listening, keep playing.</p>
             </div>
             <div class="role-switch" aria-label="Choose portal view">
               <button class="active" data-role="student" type="button">Student</button>
