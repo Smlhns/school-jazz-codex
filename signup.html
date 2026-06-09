@@ -26,15 +26,17 @@
           <p class="section-number">04</p>
           <h1>Sign up</h1>
           <p class="signin-copy">Register interest in The School of Jazz and we will be in touch with next steps.</p>
-          <form id="signupForm" class="signin-form">
+          <form id="signupForm" class="signin-form" action="https://formspree.io/f/mjgdrpvr" method="POST">
             <label>
               Name
-              <input id="signupName" type="text" autocomplete="name" required>
+              <input id="signupName" name="name" type="text" autocomplete="name" required>
             </label>
             <label>
               Email
-              <input id="signupEmail" type="email" autocomplete="email" required>
+              <input id="signupEmail" name="email" type="email" autocomplete="email" required>
             </label>
+            <input type="hidden" name="_subject" value="New School of Jazz sign-up interest">
+            <input type="hidden" name="message" value="A new person has registered interest in The School of Jazz.">
             <p class="signin-error hidden" id="signupError">Please enter a name and email address.</p>
             <button class="primary-button signin-submit" type="submit">Register interest</button>
           </form>
