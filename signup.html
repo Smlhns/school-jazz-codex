@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign Up | The School of Jazz</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html#home" aria-label="The School of Jazz home">School of Jazz</a>
+      <nav aria-label="Primary navigation">
+        <a href="index.html#mission">Mission</a>
+        <a href="index.html#book">Book</a>
+        <a href="index.html#library">Library</a>
+      </nav>
+      <div class="topbar-actions">
+        <a class="buy-pill" href="#signup">Sign up</a>
+        <a class="buy-pill" href="portal.html">Sign in</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="portal portal-page signup-page" id="signup">
+        <div class="signin-panel panel" id="signupPanel">
+          <p class="section-number">04</p>
+          <h1>Sign up</h1>
+          <p class="signin-copy">Register interest in The School of Jazz and we will be in touch with next steps.</p>
+          <form id="signupForm" class="signin-form">
+            <label>
+              Name
+              <input id="signupName" type="text" autocomplete="name" required>
+            </label>
+            <label>
+              Email
+              <input id="signupEmail" type="email" autocomplete="email" required>
+            </label>
+            <p class="signin-error hidden" id="signupError">Please enter a name and email address.</p>
+            <button class="primary-button signin-submit" type="submit">Register interest</button>
+          </form>
+        </div>
+
+        <div class="signin-panel panel signup-success hidden" id="signupSuccess">
+          <p class="section-number">04</p>
+          <h1>Wonderful. You're on the list.</h1>
+          <p class="signin-copy">Thank you for registering interest in The School of Jazz. We will be in touch soon with the next steps.</p>
+          <a class="primary-link" href="index.html#home">Back to home</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>The School of Jazz</p>
+      <p>Play · Listen · Learn</p>
+    </footer>
+
+    <script src="app.js?v=signup-library-local"></script>
+  </body>
+</html>
