@@ -30,31 +30,41 @@ const seedLogs = [
 const library = [
   {
     title: "The Girl from Ipanema",
+    artist: "Stan Getz",
     type: "Performance",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Stan%20Getz%20%281965%29.png",
     copy: "Listen for the relaxed bossa nova pulse, the gentle melody, and the way the band keeps the time floating.",
     url: "https://www.youtube.com/results?search_query=Getz+Gilberto+The+Girl+from+Ipanema"
   },
   {
     title: "All Blues",
+    artist: "Miles Davis",
     type: "Listening",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Miles%20Davis%20Press%20Photo%20%28High%20Quality%29%20%28cropped%29.jpg",
     copy: "Hear the slow six feel, the spacious melody, and the way Miles Davis lets every phrase breathe.",
     url: "https://www.youtube.com/results?search_query=Miles+Davis+All+Blues"
   },
   {
     title: "Canteloupe Island",
+    artist: "Herbie Hancock",
     type: "Groove",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Herbie%20Hancock%20%28ZMF%202017%29%20IMGP9656.jpg",
     copy: "Follow the repeating piano riff, the earthy swing, and the strong shape of Herbie Hancock's melody.",
     url: "https://www.youtube.com/results?search_query=Herbie+Hancock+Canteloupe+Island"
   },
   {
     title: "Watermelon Man",
+    artist: "Herbie Hancock",
     type: "Rhythm",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Herbie%20Hancock%20%28ZMF%202017%29%20IMGP9656.jpg",
     copy: "Listen for the bluesy hook, the dance feel, and the way the rhythm section makes the tune bounce.",
     url: "https://www.youtube.com/results?search_query=Herbie+Hancock+Watermelon+Man"
   },
   {
     title: "Sunny Side of the Street",
+    artist: "Louis Armstrong",
     type: "Song",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/%28Portrait%20of%20Louis%20Armstrong%2C%20Carnegie%20Hall%2C%20New%20York%2C%20N.Y.%2C%20ca.%20Apr.%201947%29%20%28LOC%29%20%284843734010%29.jpg",
     copy: "Hear Louis Armstrong's warmth, swing, and storytelling: every line feels like speech turned into music.",
     url: "https://www.youtube.com/results?search_query=Louis+Armstrong+Sunny+Side+of+the+Street"
   }
@@ -69,6 +79,12 @@ const signinForm = document.querySelector("#signinForm");
 const signinEmail = document.querySelector("#signinEmail");
 const signinPassword = document.querySelector("#signinPassword");
 const signinError = document.querySelector("#signinError");
+const signupForm = document.querySelector("#signupForm");
+const signupName = document.querySelector("#signupName");
+const signupEmail = document.querySelector("#signupEmail");
+const signupError = document.querySelector("#signupError");
+const signupPanel = document.querySelector("#signupPanel");
+const signupSuccess = document.querySelector("#signupSuccess");
 
 function daysAgo(amount) {
   const date = new Date();
@@ -83,6 +99,17 @@ function loadLogs() {
 
 function saveLogs() {
   localStorage.setItem("school-of-jazz-practice", JSON.stringify(logs));
+}
+
+function saveSignupInterest(name, email) {
+  const saved = localStorage.getItem("school-of-jazz-signups");
+  const signups = saved ? JSON.parse(saved) : [];
+  signups.push({
+    name,
+    email,
+    date: new Date().toISOString()
+  });
+  localStorage.setItem("school-of-jazz-signups", JSON.stringify(signups));
 }
 
 function migrateLogs(items) {
@@ -194,8 +221,9 @@ function renderLibrary() {
   if (!libraryGrid) return;
   libraryGrid.innerHTML = library.map(item => `
     <article class="library-card">
+      <img class="library-artist" src="${item.image}" alt="${item.artist}" loading="lazy">
       <h3>${item.title}</h3>
-      <p><b>${item.type}</b></p>
+      <p><b>${item.artist}</b></p>
       <p>${item.copy}</p>
       <a href="${item.url}" target="_blank" rel="noreferrer">Open inspiration</a>
     </article>
@@ -218,8 +246,20 @@ function setPortalRole(role) {
 function enterPortal(account) {
   const signinPanel = document.querySelector("#signinPanel");
   const portalShell = document.querySelector("#portalShell");
+  const portalTitle = document.querySelector("#portalTitle");
+  const portalSubtitle = document.querySelector("#portalSubtitle");
   if (signinPanel) signinPanel.classList.add("hidden");
   if (portalShell) portalShell.classList.remove("hidden");
+  if (portalTitle) {
+    portalTitle.textContent = account.role === "student" && account.student
+      ? `Welcome back, ${account.student}`
+      : "Teacher view";
+  }
+  if (portalSubtitle) {
+    portalSubtitle.textContent = account.role === "student" && account.student
+      ? "Nice to see you again. Warm up, listen closely, and give the music a few honest minutes today."
+      : "Welcome back. Here is how the band has been showing up this week.";
+  }
   if (studentSelect && account.student) studentSelect.value = account.student;
   setPortalRole(account.role);
   renderStudent();
@@ -240,6 +280,22 @@ if (signinForm) {
     }
     signinError.classList.add("hidden");
     enterPortal(account);
+  });
+}
+
+if (signupForm) {
+  signupForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = signupName.value.trim();
+    const email = signupEmail.value.trim();
+    if (!name || !email) {
+      signupError.classList.remove("hidden");
+      return;
+    }
+    signupError.classList.add("hidden");
+    saveSignupInterest(name, email);
+    if (signupPanel) signupPanel.classList.add("hidden");
+    if (signupSuccess) signupSuccess.classList.remove("hidden");
   });
 }
 
