@@ -200,6 +200,14 @@ async function registerSignupInterest(name, email) {
   if (error) throw error;
 }
 
+function isAlreadyRegisteredError(error) {
+  const message = `${error?.code || ""} ${error?.message || ""} ${error?.details || ""}`.toLowerCase();
+  return message.includes("23505")
+    || message.includes("duplicate")
+    || message.includes("already")
+    || message.includes("unique");
+}
+
 function migrateLogs(items) {
   const replacements = {
     "Blue Bossa": "All Blues",
@@ -396,7 +404,7 @@ if (signupForm) {
   signupForm.addEventListener("submit", async event => {
     event.preventDefault();
     const name = signupName.value.trim();
-    const email = signupEmail.value.trim();
+    const email = signupEmail.value.trim().toLowerCase();
     if (!name || !email) {
       signupError.textContent = "Please enter a name and email address.";
       signupError.classList.remove("hidden");
@@ -406,7 +414,12 @@ if (signupForm) {
     const submitButton = signupForm.querySelector("button[type='submit']");
     if (submitButton) submitButton.disabled = true;
     try {
-      await registerSignupInterest(name, email);
+      signupEmail.value = email;
+      try {
+        await registerSignupInterest(name, email);
+      } catch (error) {
+        if (!isAlreadyRegisteredError(error)) console.warn("Signup interest could not be saved to Supabase.", error);
+      }
       const response = await fetch(signupForm.action, {
         method: "POST",
         body: new FormData(signupForm),
