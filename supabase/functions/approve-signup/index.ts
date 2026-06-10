@@ -48,11 +48,7 @@ function isExistingUserError(error: unknown) {
     || message.includes("exists");
 }
 
-function randomPassword() {
-  const bytes = new Uint8Array(24);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
-}
+const starterPassword = "SchoolOfJazz2026";
 
 async function findAuthUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
   const target = email.toLowerCase();
@@ -103,7 +99,7 @@ Deno.serve(async request => {
   try {
     const { data: created, error: createError } = await adminClient.auth.admin.createUser({
       email,
-      password: randomPassword(),
+      password: starterPassword,
       email_confirm: true,
       user_metadata: {
         full_name: fullName,
