@@ -417,6 +417,15 @@ textarea {
   width: 100%;
 }
 
+.form-helper-link {
+  justify-self: center;
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .password-field {
   position: relative;
   display: block;
@@ -709,52 +718,45 @@ footer {
   font-weight: 900;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .topbar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .topbar nav {
-    grid-column: 1 / -1;
-    order: 3;
-    justify-content: start;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
+  .topbar nav,
   .topbar-actions {
+    justify-content: start;
     flex-wrap: wrap;
   }
 
-  .hero, .two-col, .book-band, .library, .portal-grid {
+  .hero,
+  .two-col,
+  .book-band,
+  .library,
+  .portal-grid,
+  .login-row,
+  .account-form-grid {
     grid-template-columns: 1fr;
   }
 
   .hero {
-    min-height: 0;
-    padding-top: 28px;
+    min-height: auto;
+    align-items: start;
   }
 
   .hero-copy {
-    padding-top: 34px;
-  }
-
-  .sun {
-    right: -70px;
-    top: 108px;
+    padding-top: 18px;
   }
 
   .hero-logo {
-    justify-self: start;
-    width: min(82vw, 320px);
+    justify-self: center;
+    width: min(86vw, 300px);
   }
 
-  .book-side, .book-notes, .library-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .book-cover {
-    width: min(82vw, 340px);
+  .sun {
+    right: -80px;
+    top: 120px;
   }
 
   .portal-head {
@@ -762,39 +764,87 @@ footer {
     flex-direction: column;
   }
 
-  .login-row {
+  .role-switch {
+    width: 100%;
+  }
+
+  .library-grid {
     grid-template-columns: 1fr;
   }
 
-  .account-form-grid {
-    grid-template-columns: 1fr;
+  .book-side {
+    justify-content: center;
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 560px) {
   .topbar {
-    gap: 14px;
-    letter-spacing: .12em;
+    position: relative;
+    padding: 24px 30px;
   }
 
+  .brand {
+    font-size: 13px;
+  }
+
+  .topbar nav {
+    gap: 22px;
+  }
+
+  .topbar nav a,
   .buy-pill {
-    padding: 9px 10px;
+    font-size: 13px;
   }
 
-  .editorial, .book-band, .portal, .library {
-    padding-top: 54px;
-    padding-bottom: 54px;
+  .hero,
+  .editorial,
+  .book-band,
+  .portal,
+  .library {
+    padding: 56px 48px;
+  }
+
+  .hero {
+    padding-top: 0;
+  }
+
+  .hero-copy {
+    padding-top: 0;
+  }
+
+  h1 {
+    font-size: clamp(70px, 18vw, 96px);
+  }
+
+  h2,
+  .editorial h2 {
+    font-size: clamp(44px, 13vw, 66px);
+  }
+
+  .signin-panel h1 {
+    font-size: clamp(48px, 14vw, 74px);
+  }
+
+  .library-card h3,
+  .library-card p {
+    max-width: 100%;
+  }
+
+  .library-artist {
+    position: static;
+    display: block;
+    margin: 0 0 18px auto;
   }
 
   .log-entry, .student-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
   }
 
-  .date-chip {
-    width: 54px;
+  .minutes {
+    grid-column: 2;
   }
 
   footer {
-    flex-direction: column;
+    display: grid;
   }
 }

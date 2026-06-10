@@ -97,6 +97,17 @@ const signupEmail = document.querySelector("#signupEmail");
 const signupError = document.querySelector("#signupError");
 const signupPanel = document.querySelector("#signupPanel");
 const signupSuccess = document.querySelector("#signupSuccess");
+const passwordRequestForm = document.querySelector("#passwordRequestForm");
+const passwordEmail = document.querySelector("#passwordEmail");
+const passwordRequestError = document.querySelector("#passwordRequestError");
+const passwordRequestStatus = document.querySelector("#passwordRequestStatus");
+const passwordRequestPanel = document.querySelector("#passwordRequestPanel");
+const passwordUpdatePanel = document.querySelector("#passwordUpdatePanel");
+const passwordUpdateForm = document.querySelector("#passwordUpdateForm");
+const newPassword = document.querySelector("#newPassword");
+const confirmNewPassword = document.querySelector("#confirmNewPassword");
+const passwordUpdateError = document.querySelector("#passwordUpdateError");
+const passwordUpdateStatus = document.querySelector("#passwordUpdateStatus");
 
 function daysAgo(amount) {
   const date = new Date();
@@ -122,6 +133,13 @@ function saveSignupInterest(name, email) {
     date: new Date().toISOString()
   });
   localStorage.setItem("school-of-jazz-signups", JSON.stringify(signups));
+}
+
+function getPasswordRedirectUrl() {
+  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+    return `${window.location.origin}${window.location.pathname}`;
+  }
+  return "https://theschoolofjazz.com/password.html";
 }
 
 function getStudentNameFromEmail(email) {
@@ -708,6 +726,101 @@ if (signupForm) {
     } catch (error) {
       signupError.textContent = "Something went wrong. Please try again in a moment.";
       signupError.classList.remove("hidden");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
+  });
+}
+
+if (passwordRequestForm) {
+  passwordRequestForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const email = passwordEmail.value.trim().toLowerCase();
+    if (!email || !supabaseClient) {
+      passwordRequestError.textContent = "Please enter the email address connected to your account.";
+      passwordRequestError.classList.remove("hidden");
+      return;
+    }
+    const submitButton = passwordRequestForm.querySelector("button[type='submit']");
+    const originalButtonText = submitButton?.textContent || "";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+    }
+    passwordRequestError.classList.add("hidden");
+    passwordRequestStatus.classList.add("hidden");
+    try {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: getPasswordRedirectUrl()
+      });
+      if (error) throw error;
+      passwordRequestStatus.textContent = "Check your email for a set-password link.";
+      passwordRequestStatus.classList.remove("hidden");
+      passwordRequestForm.reset();
+    } catch (error) {
+      passwordRequestError.textContent = "We could not send that email. Please check the address and try again.";
+      passwordRequestError.classList.remove("hidden");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
+  });
+}
+
+if (passwordUpdateForm) {
+  supabaseClient?.auth.onAuthStateChange(event => {
+    if (event === "PASSWORD_RECOVERY") {
+      if (passwordRequestPanel) passwordRequestPanel.classList.add("hidden");
+      if (passwordUpdatePanel) passwordUpdatePanel.classList.remove("hidden");
+    }
+  });
+
+  supabaseClient?.auth.getSession().then(({ data }) => {
+    if (data?.session) {
+      if (passwordRequestPanel) passwordRequestPanel.classList.add("hidden");
+      if (passwordUpdatePanel) passwordUpdatePanel.classList.remove("hidden");
+    }
+  });
+
+  passwordUpdateForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const password = newPassword.value;
+    const confirmation = confirmNewPassword.value;
+    if (password.length < 6) {
+      passwordUpdateError.textContent = "Please choose a password with at least six characters.";
+      passwordUpdateError.classList.remove("hidden");
+      return;
+    }
+    if (password !== confirmation) {
+      passwordUpdateError.textContent = "The passwords do not match.";
+      passwordUpdateError.classList.remove("hidden");
+      return;
+    }
+    const submitButton = passwordUpdateForm.querySelector("button[type='submit']");
+    const originalButtonText = submitButton?.textContent || "";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Saving...";
+    }
+    passwordUpdateError.classList.add("hidden");
+    passwordUpdateStatus.classList.add("hidden");
+    try {
+      const { error } = await supabaseClient.auth.updateUser({ password });
+      if (error) throw error;
+      passwordUpdateStatus.textContent = "Password saved. You can now sign in.";
+      passwordUpdateStatus.classList.remove("hidden");
+      passwordUpdateForm.reset();
+      window.setTimeout(() => {
+        window.location.href = "portal.html";
+      }, 1400);
+    } catch (error) {
+      passwordUpdateError.textContent = "Password could not be saved. Please open the email link again.";
+      passwordUpdateError.classList.remove("hidden");
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
