@@ -352,6 +352,13 @@ async function registerSignupInterest(name, email) {
   if (error) throw error;
 }
 
+function fetchWithTimeout(url, options, timeout = 6000) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => window.clearTimeout(timer));
+}
+
 function isAlreadyRegisteredError(error) {
   const message = `${error?.code || ""} ${error?.message || ""} ${error?.details || ""}`.toLowerCase();
   return message.includes("23505")
@@ -670,20 +677,30 @@ if (signupForm) {
     }
     signupError.classList.add("hidden");
     const submitButton = signupForm.querySelector("button[type='submit']");
-    if (submitButton) submitButton.disabled = true;
+    const originalButtonText = submitButton?.textContent || "";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Registering...";
+    }
     try {
       signupEmail.value = email;
-      try {
-        await registerSignupInterest(name, email);
-      } catch (error) {
-        if (!isAlreadyRegisteredError(error)) console.warn("Signup interest could not be saved to Supabase.", error);
-      }
-      const response = await fetch(signupForm.action, {
+      const formData = new FormData(signupForm);
+      const signupRequest = registerSignupInterest(name, email);
+      const emailRequest = fetchWithTimeout(signupForm.action, {
         method: "POST",
-        body: new FormData(signupForm),
+        body: formData,
         headers: { Accept: "application/json" }
       });
-      if (!response.ok) throw new Error("Form submission failed");
+      const [signupResult, emailResult] = await Promise.allSettled([signupRequest, emailRequest]);
+      const signupOk = signupResult.status === "fulfilled" || isAlreadyRegisteredError(signupResult.reason);
+      const emailOk = emailResult.status === "fulfilled" && emailResult.value.ok;
+      if (!signupOk && !emailOk) throw new Error("Signup submission failed");
+      if (signupResult.status === "rejected" && !isAlreadyRegisteredError(signupResult.reason)) {
+        console.warn("Signup interest could not be saved to Supabase.", signupResult.reason);
+      }
+      if (emailResult.status === "rejected" || (emailResult.status === "fulfilled" && !emailResult.value.ok)) {
+        console.warn("Signup email notification could not be sent quickly.");
+      }
       saveSignupInterest(name, email);
       signupForm.reset();
       if (signupPanel) signupPanel.classList.add("hidden");
@@ -692,7 +709,10 @@ if (signupForm) {
       signupError.textContent = "Something went wrong. Please try again in a moment.";
       signupError.classList.remove("hidden");
     } finally {
-      if (submitButton) submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
     }
   });
 }
