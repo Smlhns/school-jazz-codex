@@ -38,6 +38,16 @@ function displayNameFromEmail(email: string) {
     .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
+function isExistingUserError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const message = "message" in error ? String(error.message).toLowerCase() : "";
+  const code = "code" in error ? String(error.code).toLowerCase() : "";
+  return code.includes("user_already_exists")
+    || message.includes("already")
+    || message.includes("registered")
+    || message.includes("exists");
+}
+
 async function findAuthUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
   const target = email.toLowerCase();
   for (let page = 1; page <= 20; page += 1) {
@@ -86,20 +96,21 @@ Deno.serve(async request => {
   const instrument = payload.instrument || null;
 
   try {
-    let user = await findAuthUserByEmail(adminClient, email);
+    const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      data: {
+        full_name: fullName,
+        username,
+        role,
+        instrument
+      },
+      redirectTo: siteUrl
+    });
 
-    if (!user) {
-      const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
-        data: {
-          full_name: fullName,
-          username,
-          role,
-          instrument
-        },
-        redirectTo: siteUrl
-      });
-      if (error) throw error;
-      user = data.user;
+    let user = invited.user;
+
+    if (inviteError) {
+      if (!isExistingUserError(inviteError)) throw inviteError;
+      user = await findAuthUserByEmail(adminClient, email);
     }
 
     if (!user) throw new Error("Auth user could not be created or found.");
