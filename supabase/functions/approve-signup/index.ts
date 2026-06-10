@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type SignupRequest = {
+  approval_secret?: string;
   signup_interest_id?: number;
   name?: string;
   email?: string;
@@ -53,8 +54,16 @@ Deno.serve(async request => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
+  let payload: SignupRequest;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400);
+  }
+
   const approvalSecret = requiredEnv("APPROVAL_SECRET");
-  if (request.headers.get("x-approval-secret") !== approvalSecret) {
+  const requestSecret = request.headers.get("x-approval-secret") || payload.approval_secret;
+  if (requestSecret !== approvalSecret) {
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
@@ -67,13 +76,6 @@ Deno.serve(async request => {
       persistSession: false
     }
   });
-
-  let payload: SignupRequest;
-  try {
-    payload = await request.json();
-  } catch {
-    return jsonResponse({ error: "Invalid JSON" }, 400);
-  }
 
   const email = payload.email?.trim().toLowerCase();
   if (!email) return jsonResponse({ error: "Email is required" }, 400);
