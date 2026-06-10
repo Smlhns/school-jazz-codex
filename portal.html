@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="180x180" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=profile-settings-1">
   </head>
   <body>
     <header class="topbar">
@@ -19,7 +19,11 @@
       </nav>
       <div class="topbar-actions">
         <a class="buy-pill" href="signup.html">Sign up</a>
-        <a class="buy-pill" href="#portal">Sign in</a>
+        <a class="buy-pill" id="topbarSigninLink" href="#portal">Sign in</a>
+        <button class="profile-pill hidden" id="profileMenuButton" type="button">
+          <span id="profileButtonName">Profile</span>
+          <small id="profileButtonEmail"></small>
+        </button>
       </div>
     </header>
 
@@ -36,7 +40,10 @@
             </label>
             <label>
               Password
-              <input id="signinPassword" type="password" autocomplete="current-password" required>
+              <span class="password-field">
+                <input id="signinPassword" type="password" autocomplete="current-password" required>
+                <button class="field-toggle" id="showSigninPassword" type="button">Show</button>
+              </span>
             </label>
             <p class="signin-error hidden" id="signinError">Please check the email address and password.</p>
             <button class="primary-button signin-submit" id="enterPortalButton" type="submit">Enter portal</button>
@@ -55,6 +62,54 @@
               <button data-role="teacher" type="button">Teacher</button>
             </div>
           </div>
+
+          <section class="panel account-panel hidden" id="accountPanel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Profile settings</p>
+                <h3>Account</h3>
+              </div>
+              <button class="text-button" id="closeAccountPanel" type="button">Close</button>
+            </div>
+            <form id="profileForm">
+              <div class="account-form-grid">
+                <label>
+                  Username
+                  <input id="profileUsername" type="text" autocomplete="nickname">
+                </label>
+                <label>
+                  Display name
+                  <input id="profileFullName" type="text" autocomplete="name" required>
+                </label>
+                <label>
+                  Account type
+                  <select id="profileRole">
+                    <option value="student">Student</option>
+                    <option value="parent">Parent</option>
+                    <option value="teacher">Teacher</option>
+                  </select>
+                </label>
+                <label>
+                  Email
+                  <input id="profileEmail" type="email" autocomplete="email" required>
+                </label>
+                <label>
+                  New password
+                  <input id="profilePassword" type="password" autocomplete="new-password">
+                </label>
+                <label>
+                  Confirm password
+                  <input id="profilePasswordConfirm" type="password" autocomplete="new-password">
+                </label>
+              </div>
+              <p class="signin-error hidden" id="profileError">Profile could not be saved.</p>
+              <p class="profile-status hidden" id="profileStatus">Profile saved.</p>
+              <div class="profile-actions">
+                <button class="primary-button" type="submit">Save profile</button>
+                <button class="text-button" id="signOutButton" type="button">Sign out</button>
+              </div>
+            </form>
+          </section>
 
           <div class="login-row" aria-label="Portal account controls">
             <label class="student-account-control">
@@ -134,6 +189,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js?v=1"></script>
-    <script src="app.js?v=supabase-auth-1"></script>
+    <script src="app.js?v=profile-settings-2"></script>
   </body>
 </html>

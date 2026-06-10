@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="180x180" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=profile-settings-1">
   </head>
   <body>
     <header class="topbar">
@@ -19,7 +19,11 @@
       </nav>
       <div class="topbar-actions">
         <a class="buy-pill" href="#signup">Sign up</a>
-        <a class="buy-pill" href="portal.html">Sign in</a>
+        <a class="buy-pill" id="topbarSigninLink" href="portal.html">Sign in</a>
+        <button class="profile-pill hidden" id="profileMenuButton" type="button">
+          <span id="profileButtonName">Profile</span>
+          <small id="profileButtonEmail"></small>
+        </button>
       </div>
     </header>
 
@@ -61,6 +65,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js?v=1"></script>
-    <script src="app.js?v=supabase-signup-1"></script>
+    <script src="app.js?v=profile-settings-2"></script>
   </body>
 </html>

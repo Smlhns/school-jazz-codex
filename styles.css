@@ -63,6 +63,37 @@ a { color: inherit; }
   white-space: nowrap;
 }
 
+.profile-pill {
+  display: grid;
+  gap: 2px;
+  min-width: 152px;
+  border: 2px solid white;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.profile-pill span {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.profile-pill small {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.1;
+  opacity: .88;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .hero {
   position: relative;
   min-height: 84vh;
@@ -236,6 +267,7 @@ h2 {
 }
 
 .primary-link, .primary-button,
+.text-button,
 .role-switch button,
 label,
 select,
@@ -270,6 +302,20 @@ textarea {
   color: white;
   font-weight: 900;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: rgba(255,255,255,.42);
+  color: var(--ink);
+  font-weight: 900;
   cursor: pointer;
 }
 
@@ -371,6 +417,30 @@ textarea {
   width: 100%;
 }
 
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  padding-right: 78px;
+}
+
+.field-toggle {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: var(--teal);
+  color: white;
+  font-weight: 900;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
 .signin-error {
   margin: -2px 0 0;
   color: var(--hot);
@@ -399,6 +469,44 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 260px));
   gap: 14px;
   margin-bottom: 24px;
+}
+
+.account-panel {
+  margin-bottom: 24px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.panel-head h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.account-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-status {
+  margin: -2px 0 0;
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 900;
 }
 
 label {
@@ -655,6 +763,10 @@ footer {
   }
 
   .login-row {
+    grid-template-columns: 1fr;
+  }
+
+  .account-form-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -66,6 +66,7 @@ let logs = loadLogs();
 saveLogs();
 let activeAccount = null;
 const supabaseClient = window.schoolJazzSupabase || null;
+let profileSupportsUsername = true;
 const roleButtons = document.querySelectorAll("[data-role]");
 const studentSelect = document.querySelector("#studentSelect");
 const practiceForm = document.querySelector("#practiceForm");
@@ -73,6 +74,23 @@ const signinForm = document.querySelector("#signinForm");
 const signinEmail = document.querySelector("#signinEmail");
 const signinPassword = document.querySelector("#signinPassword");
 const signinError = document.querySelector("#signinError");
+const showSigninPassword = document.querySelector("#showSigninPassword");
+const topbarSigninLink = document.querySelector("#topbarSigninLink");
+const profileMenuButton = document.querySelector("#profileMenuButton");
+const profileButtonName = document.querySelector("#profileButtonName");
+const profileButtonEmail = document.querySelector("#profileButtonEmail");
+const accountPanel = document.querySelector("#accountPanel");
+const closeAccountPanel = document.querySelector("#closeAccountPanel");
+const profileForm = document.querySelector("#profileForm");
+const profileUsername = document.querySelector("#profileUsername");
+const profileFullName = document.querySelector("#profileFullName");
+const profileRole = document.querySelector("#profileRole");
+const profileEmail = document.querySelector("#profileEmail");
+const profilePassword = document.querySelector("#profilePassword");
+const profilePasswordConfirm = document.querySelector("#profilePasswordConfirm");
+const profileError = document.querySelector("#profileError");
+const profileStatus = document.querySelector("#profileStatus");
+const signOutButton = document.querySelector("#signOutButton");
 const signupForm = document.querySelector("#signupForm");
 const signupName = document.querySelector("#signupName");
 const signupEmail = document.querySelector("#signupEmail");
@@ -118,22 +136,64 @@ function getStudentNameFromProfile(profile, email) {
 
 function profileToAccount(profile, user) {
   const email = user.email.toLowerCase();
-  const role = profile?.role === "teacher" || profile?.role === "admin" ? "teacher" : "student";
-  const student = role === "student" ? getStudentNameFromProfile(profile, email) : null;
+  const accountType = profile?.role || "student";
+  const role = accountType === "teacher" || accountType === "admin" ? "teacher" : "student";
+  const student = accountType === "student" ? getStudentNameFromProfile(profile, email) : null;
+  const fullName = profile?.full_name || getStudentNameFromEmail(email);
+  const username = profile?.username || fullName;
   return {
     role,
+    accountType,
     student,
+    email,
+    fullName,
+    username,
     profileId: user.id,
     supabase: true
   };
 }
 
-async function getOrCreateProfile(user) {
-  const { data, error } = await supabaseClient
+function isMissingUsernameError(error) {
+  const message = `${error?.code || ""} ${error?.message || ""} ${error?.details || ""}`.toLowerCase();
+  return message.includes("42703")
+    || message.includes("username")
+    || message.includes("column")
+    || message.includes("schema cache");
+}
+
+async function fetchProfile(userId) {
+  const fields = profileSupportsUsername
+    ? "id, email, full_name, username, role, instrument"
+    : "id, email, full_name, role, instrument";
+  const result = await supabaseClient
     .from("profiles")
-    .select("id, email, full_name, role, instrument")
-    .eq("id", user.id)
+    .select(fields)
+    .eq("id", userId)
     .maybeSingle();
+  if (result.error && profileSupportsUsername && isMissingUsernameError(result.error)) {
+    profileSupportsUsername = false;
+    return fetchProfile(userId);
+  }
+  return result;
+}
+
+async function createProfile(profile) {
+  const payload = profileSupportsUsername ? profile : { ...profile };
+  if (!profileSupportsUsername) delete payload.username;
+  const result = await supabaseClient
+    .from("profiles")
+    .insert(payload)
+    .select(profileSupportsUsername ? "id, email, full_name, username, role, instrument" : "id, email, full_name, role, instrument")
+    .single();
+  if (result.error && profileSupportsUsername && isMissingUsernameError(result.error)) {
+    profileSupportsUsername = false;
+    return createProfile(profile);
+  }
+  return result;
+}
+
+async function getOrCreateProfile(user) {
+  const { data, error } = await fetchProfile(user.id);
 
   if (data) return data;
   const email = user.email.toLowerCase();
@@ -145,14 +205,11 @@ async function getOrCreateProfile(user) {
     id: user.id,
     email,
     full_name: student,
+    username: student,
     role: "student",
     instrument: students[student]?.instrument || null
   };
-  const { data: created, error: createError } = await supabaseClient
-    .from("profiles")
-    .insert(fallbackProfile)
-    .select("id, email, full_name, role, instrument")
-    .single();
+  const { data: created, error: createError } = await createProfile(fallbackProfile);
   if (createError) throw createError;
   return created;
 }
@@ -188,8 +245,103 @@ async function signInWithSupabase(email, password) {
   if (error) throw error;
   const profile = await getOrCreateProfile(data.user);
   const account = profileToAccount(profile, data.user);
-  await loadSupabaseLogs(account);
+  await safelyLoadSupabaseLogs(account);
   return account;
+}
+
+function getLocalPortalAccount(email, password) {
+  const account = portalAccounts[email];
+  if (!account || password !== portalPassword) return null;
+  if (account.role === "teacher") {
+    return {
+      ...account,
+      accountType: "teacher",
+      email,
+      fullName: "Teacher",
+      username: "Teacher"
+    };
+  }
+  return {
+    ...account,
+    accountType: "student",
+    email,
+    fullName: account.student,
+    username: account.student
+  };
+}
+
+function accountDisplayName(account) {
+  return account?.username || account?.fullName || account?.student || "Profile";
+}
+
+function updateProfileButton(account) {
+  if (!topbarSigninLink || !profileMenuButton) return;
+  if (!account) {
+    topbarSigninLink.classList.remove("hidden");
+    profileMenuButton.classList.add("hidden");
+    return;
+  }
+  topbarSigninLink.classList.add("hidden");
+  profileMenuButton.classList.remove("hidden");
+  if (profileButtonName) profileButtonName.textContent = accountDisplayName(account);
+  if (profileButtonEmail) profileButtonEmail.textContent = account.email || "";
+}
+
+function populateProfileForm(account) {
+  if (!profileForm || !account) return;
+  if (profileUsername) profileUsername.value = account.username || "";
+  if (profileFullName) profileFullName.value = account.fullName || accountDisplayName(account);
+  if (profileEmail) profileEmail.value = account.email || "";
+  if (profileRole) {
+    profileRole.value = account.accountType === "admin" ? "teacher" : account.accountType;
+    const isStaff = account.accountType === "teacher" || account.accountType === "admin";
+    [...profileRole.options].forEach(option => {
+      option.disabled = option.value === "teacher" && !isStaff;
+    });
+  }
+  if (profilePassword) profilePassword.value = "";
+  if (profilePasswordConfirm) profilePasswordConfirm.value = "";
+  if (profileError) profileError.classList.add("hidden");
+  if (profileStatus) profileStatus.classList.add("hidden");
+}
+
+function showAccountPanel() {
+  if (!accountPanel) {
+    window.location.href = "portal.html#account";
+    return;
+  }
+  populateProfileForm(activeAccount);
+  accountPanel.classList.remove("hidden");
+  accountPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function hideAccountPanel() {
+  if (accountPanel) accountPanel.classList.add("hidden");
+}
+
+function resetPortalSession() {
+  activeAccount = null;
+  updateProfileButton(null);
+  hideAccountPanel();
+  const signinPanel = document.querySelector("#signinPanel");
+  const portalShell = document.querySelector("#portalShell");
+  if (portalShell) portalShell.classList.add("hidden");
+  if (signinPanel) signinPanel.classList.remove("hidden");
+}
+
+async function loadAccountFromUser(user) {
+  const profile = await getOrCreateProfile(user);
+  const account = profileToAccount(profile, user);
+  await safelyLoadSupabaseLogs(account);
+  return account;
+}
+
+async function safelyLoadSupabaseLogs(account) {
+  try {
+    await loadSupabaseLogs(account);
+  } catch (error) {
+    console.warn("Practice logs could not be loaded.", error);
+  }
 }
 
 async function registerSignupInterest(name, email) {
@@ -347,8 +499,8 @@ function enterPortal(account) {
   if (signinPanel) signinPanel.classList.add("hidden");
   if (portalShell) portalShell.classList.remove("hidden");
   if (portalTitle) {
-    portalTitle.textContent = account.role === "student" && account.student
-      ? `Welcome back, ${account.student}`
+    portalTitle.textContent = account.role === "student"
+      ? `Welcome back, ${accountDisplayName(account)}`
       : "Teacher view";
   }
   if (portalSubtitle) {
@@ -357,6 +509,8 @@ function enterPortal(account) {
       : "Welcome back. Here is how the band has been showing up this week.";
   }
   if (studentSelect && account.student) studentSelect.value = account.student;
+  updateProfileButton(account);
+  populateProfileForm(account);
   setPortalRole(account.role);
   renderStudent();
   renderTeacher();
@@ -375,25 +529,129 @@ if (signinForm) {
       signinError.classList.add("hidden");
       enterPortal(account);
     } catch (error) {
-      if (supabaseClient) {
+      const localAccount = getLocalPortalAccount(email, password);
+      if (!localAccount) {
         signinError.textContent = "Please check the email address and password.";
         signinError.classList.remove("hidden");
         signinPassword.value = "";
         signinPassword.focus();
         return;
       }
-      const account = portalAccounts[email];
-      const passwordMatches = password === portalPassword;
-      if (!account || !passwordMatches) {
-        signinError.textContent = "Please check the email address and password.";
-        signinError.classList.remove("hidden");
-        signinPassword.value = "";
-        signinPassword.focus();
-        return;
-      }
-      activeAccount = account;
+      activeAccount = localAccount;
       signinError.classList.add("hidden");
-      enterPortal(account);
+      enterPortal(localAccount);
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+}
+
+if (showSigninPassword && signinPassword) {
+  showSigninPassword.addEventListener("click", () => {
+    const showing = signinPassword.type === "text";
+    signinPassword.type = showing ? "password" : "text";
+    showSigninPassword.textContent = showing ? "Show" : "Hide";
+  });
+}
+
+if (profileMenuButton) {
+  profileMenuButton.addEventListener("click", showAccountPanel);
+}
+
+if (closeAccountPanel) {
+  closeAccountPanel.addEventListener("click", hideAccountPanel);
+}
+
+if (signOutButton) {
+  signOutButton.addEventListener("click", async () => {
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    resetPortalSession();
+  });
+}
+
+if (profileForm) {
+  profileForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!activeAccount?.supabase || !supabaseClient) return;
+    const fullName = profileFullName.value.trim();
+    const username = profileUsername.value.trim();
+    const email = profileEmail.value.trim().toLowerCase();
+    const requestedRole = profileRole.value;
+    const password = profilePassword.value;
+    const passwordConfirm = profilePasswordConfirm.value;
+    const isStaff = activeAccount.accountType === "teacher" || activeAccount.accountType === "admin";
+    if (!fullName || !email) {
+      profileError.textContent = "Please enter a display name and email address.";
+      profileError.classList.remove("hidden");
+      return;
+    }
+    if (requestedRole === "teacher" && !isStaff) {
+      profileError.textContent = "Teacher access needs to be approved by an admin.";
+      profileError.classList.remove("hidden");
+      return;
+    }
+    if (password || passwordConfirm) {
+      if (password.length < 6) {
+        profileError.textContent = "Please choose a password with at least six characters.";
+        profileError.classList.remove("hidden");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        profileError.textContent = "The new passwords do not match.";
+        profileError.classList.remove("hidden");
+        return;
+      }
+    }
+
+    const submitButton = profileForm.querySelector("button[type='submit']");
+    if (submitButton) submitButton.disabled = true;
+    profileError.classList.add("hidden");
+    profileStatus.classList.add("hidden");
+    try {
+      const nextRole = activeAccount.accountType === "admin" ? "admin" : requestedRole;
+      const profileUpdate = {
+        full_name: fullName,
+        role: nextRole
+      };
+      if (profileSupportsUsername) profileUpdate.username = username || fullName;
+      const { error: profileUpdateError } = await supabaseClient
+        .from("profiles")
+        .update(profileUpdate)
+        .eq("id", activeAccount.profileId);
+      if (profileUpdateError) {
+        if (profileSupportsUsername && isMissingUsernameError(profileUpdateError)) {
+          profileSupportsUsername = false;
+          delete profileUpdate.username;
+          const { error: retryProfileUpdateError } = await supabaseClient
+            .from("profiles")
+            .update(profileUpdate)
+            .eq("id", activeAccount.profileId);
+          if (retryProfileUpdateError) throw retryProfileUpdateError;
+        } else {
+          throw profileUpdateError;
+        }
+      }
+
+      const authUpdates = {};
+      if (email !== activeAccount.email) authUpdates.email = email;
+      if (password) authUpdates.password = password;
+      if (Object.keys(authUpdates).length) {
+        const { error: authUpdateError } = await supabaseClient.auth.updateUser(authUpdates);
+        if (authUpdateError) throw authUpdateError;
+      }
+
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+      if (userError) throw userError;
+      activeAccount = await loadAccountFromUser(userData.user);
+      enterPortal(activeAccount);
+      showAccountPanel();
+      profileStatus.textContent = email !== activeAccount.email
+        ? "Profile saved. Check your email to confirm the address change."
+        : "Profile saved.";
+      profileStatus.classList.remove("hidden");
+    } catch (error) {
+      profileError.textContent = "Profile could not be saved. Please try again.";
+      profileError.classList.remove("hidden");
     } finally {
       if (submitButton) submitButton.disabled = false;
     }
@@ -485,4 +743,30 @@ if (practiceForm) {
   });
 }
 
+async function restorePortalSession() {
+  if (!supabaseClient) {
+    updateProfileButton(null);
+    return;
+  }
+  try {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error || !data?.user) {
+      updateProfileButton(null);
+      return;
+    }
+    activeAccount = await loadAccountFromUser(data.user);
+    if (signinForm) {
+      enterPortal(activeAccount);
+      if (window.location.hash === "#account" || window.location.hash === "#accountPanel") {
+        showAccountPanel();
+      }
+    } else {
+      updateProfileButton(activeAccount);
+    }
+  } catch (error) {
+    updateProfileButton(null);
+  }
+}
+
 renderLibrary();
+restorePortalSession();
