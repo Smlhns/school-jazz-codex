@@ -48,6 +48,12 @@ function isExistingUserError(error: unknown) {
     || message.includes("exists");
 }
 
+function randomPassword() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
 async function findAuthUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
   const target = email.toLowerCase();
   for (let page = 1; page <= 20; page += 1) {
@@ -79,7 +85,6 @@ Deno.serve(async request => {
 
   const supabaseUrl = requiredEnv("SUPABASE_URL");
   const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
-  const siteUrl = Deno.env.get("SITE_URL") || "https://theschoolofjazz.com/portal.html";
   const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
@@ -96,20 +101,22 @@ Deno.serve(async request => {
   const instrument = payload.instrument || null;
 
   try {
-    const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-      data: {
+    const { data: created, error: createError } = await adminClient.auth.admin.createUser({
+      email,
+      password: randomPassword(),
+      email_confirm: true,
+      user_metadata: {
         full_name: fullName,
         username,
         role,
         instrument
-      },
-      redirectTo: siteUrl
+      }
     });
 
-    let user = invited.user;
+    let user = created.user;
 
-    if (inviteError) {
-      if (!isExistingUserError(inviteError)) throw inviteError;
+    if (createError) {
+      if (!isExistingUserError(createError)) throw createError;
       user = await findAuthUserByEmail(adminClient, email);
     }
 
